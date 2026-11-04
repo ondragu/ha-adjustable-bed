@@ -1,0 +1,54 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Verstellbares Bett einrichten",
+        "description": "Wähle, ob das Bett eine oder zwei unabhängige Seiten hat.",
+        "data": {
+          "name": "Name",
+          "side_count": "Anzahl der Bettseiten"
+        }
+      },
+      "side_left": {
+        "title": "Linke Bettseite",
+        "description": "Wähle Relais-Schalter und Winkelsensoren.",
+        "data": {
+          "head_up": "Kopfteil hoch",
+          "head_down": "Kopfteil runter",
+          "head_sensor": "Winkelsensor Kopfteil",
+          "head_min": "Minimaler Kopfteil-Winkel",
+          "head_max": "Maximaler Kopfteil-Winkel",
+          "foot_up": "Fußteil hoch",
+          "foot_down": "Fußteil runter",
+          "foot_sensor": "Winkelsensor Fußteil",
+          "foot_min": "Minimaler Fußteil-Winkel",
+          "foot_max": "Maximaler Fußteil-Winkel"
+        }
+      },
+      "side_right": {
+        "title": "Rechte Bettseite",
+        "description": "Wähle Relais-Schalter und Winkelsensoren.",
+        "data": {
+          "head_up": "Kopfteil hoch",
+          "head_down": "Kopfteil runter",
+          "head_sensor": "Winkelsensor Kopfteil",
+          "head_min": "Minimaler Kopfteil-Winkel",
+          "head_max": "Maximaler Kopfteil-Winkel",
+          "foot_up": "Fußteil hoch",
+          "foot_down": "Fußteil runter",
+          "foot_sensor": "Winkelsensor Fußteil",
+          "foot_min": "Minimaler Fußteil-Winkel",
+          "foot_max": "Maximaler Fußteil-Winkel"
+        }
+      }
+    }
+  },
+  "selector": {
+    "sides": {
+      "options": {
+        "one": "Eine Bettseite",
+        "two": "Zwei Bettseiten"
+      }
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "domain": "adjustable_bed_entity",
+  "name": "Adjustable Bed Entity Bridge",
+  "codeowners": ["@ondragu"],
+  "config_flow": true,
+  "documentation": "https://github.com/ondragu/ha-adjustable-bed",
+  "integration_type": "device",
+  "iot_class": "assumed_state",
+  "requirements": [],
+  "version": "1.0.0"
+}
