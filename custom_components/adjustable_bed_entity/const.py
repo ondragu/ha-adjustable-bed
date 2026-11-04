@@ -1,10 +1,11 @@
 """Constants for the Adjustable Bed Entity Bridge integration."""
 
 DOMAIN = "adjustable_bed_entity"
-PLATFORMS = ["cover"]
+PLATFORMS = ["cover", "button"]
 
 CONF_NAME = "name"
 CONF_SIDES = "sides"
+CONF_PRESETS = "presets"
 
 SIDE_LEFT = "left"
 SIDE_RIGHT = "right"
@@ -24,3 +25,5 @@ CONF_FOOT_MAX = "foot_max"
 
 HEAD = "head"
 FOOT = "foot"
+
+MAX_PRESETS = 6

@@ -40,14 +40,46 @@
           "foot_min": "Minimaler Fußteil-Winkel",
           "foot_max": "Maximaler Fußteil-Winkel"
         }
+      },
+      "presets": {
+        "title": "Presets und Memory-Positionen",
+        "description": "Optional: Benenne bis zu sechs Presets und wähle die auslösende Entität.",
+        "data": {
+          "preset_0_name": "Preset 1 Name",
+          "preset_0_entity": "Preset 1 Entität",
+          "preset_1_name": "Preset 2 Name",
+          "preset_1_entity": "Preset 2 Entität",
+          "preset_2_name": "Preset 3 Name",
+          "preset_2_entity": "Preset 3 Entität",
+          "preset_3_name": "Preset 4 Name",
+          "preset_3_entity": "Preset 4 Entität",
+          "preset_4_name": "Preset 5 Name",
+          "preset_4_entity": "Preset 5 Entität",
+          "preset_5_name": "Preset 6 Name",
+          "preset_5_entity": "Preset 6 Entität"
+        }
       }
     }
   },
   "options": {
     "step": {
-      "init": {
-        "title": "Einstellungen",
-        "description": "Derzeit sind keine zusätzlichen Optionen erforderlich."
+      "presets": {
+        "title": "Presets und Memory-Positionen",
+        "description": "Optional: Benenne bis zu sechs Presets und wähle die auslösende Entität.",
+        "data": {
+          "preset_0_name": "Preset 1 Name",
+          "preset_0_entity": "Preset 1 Entität",
+          "preset_1_name": "Preset 2 Name",
+          "preset_1_entity": "Preset 2 Entität",
+          "preset_2_name": "Preset 3 Name",
+          "preset_2_entity": "Preset 3 Entität",
+          "preset_3_name": "Preset 4 Name",
+          "preset_3_entity": "Preset 4 Entität",
+          "preset_4_name": "Preset 5 Name",
+          "preset_4_entity": "Preset 5 Entität",
+          "preset_5_name": "Preset 6 Name",
+          "preset_5_entity": "Preset 6 Entität"
+        }
       }
     }
   },

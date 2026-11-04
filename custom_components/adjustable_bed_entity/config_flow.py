@@ -29,14 +29,19 @@ from .const import (
     CONF_HEAD_SENSOR,
     CONF_HEAD_UP,
     CONF_NAME,
+    CONF_PRESETS,
     CONF_SIDES,
     DOMAIN,
+    MAX_PRESETS,
     SIDE_LEFT,
     SIDE_RIGHT,
 )
 
 SWITCH = EntitySelector(EntitySelectorConfig(domain="switch"))
 SENSOR = EntitySelector(EntitySelectorConfig(domain="sensor"))
+PRESET_ENTITY = EntitySelector(
+    EntitySelectorConfig(domain=["button", "script", "scene", "switch"])
+)
 
 ANGLE = NumberSelector(
     NumberSelectorConfig(min=-90, max=90, step=0.1, mode="box")
@@ -68,6 +73,47 @@ def side_schema(data: dict | None = None) -> vol.Schema:
             vol.Required(CONF_FOOT_MAX, default=data.get(CONF_FOOT_MAX, 45)): ANGLE,
         }
     )
+
+
+def presets_schema(data: list | None = None) -> vol.Schema:
+    """Build the optional preset and memory-position schema."""
+    data = data or []
+    schema = {}
+
+    for index in range(MAX_PRESETS):
+        existing = data[index] if index < len(data) else {}
+
+        schema[
+            vol.Optional(
+                f"preset_{index}_name",
+                default=existing.get("name", ""),
+                description="Name",
+            )
+        ] = TextSelector()
+
+        schema[
+            vol.Optional(
+                f"preset_{index}_entity",
+                default=existing.get("entity"),
+                description="Entität",
+            )
+        ] = PRESET_ENTITY
+
+    return vol.Schema(schema)
+
+
+def parse_presets(user_input: dict) -> list[dict]:
+    """Convert preset form fields into a compact configuration list."""
+    presets = []
+
+    for index in range(MAX_PRESETS):
+        name = user_input.get(f"preset_{index}_name", "").strip()
+        entity = user_input.get(f"preset_{index}_entity")
+
+        if name and entity:
+            presets.append({"name": name, "entity": entity})
+
+    return presets
 
 
 class AdjustableBedEntityConfigFlow(
@@ -109,13 +155,7 @@ class AdjustableBedEntityConfigFlow(
             if self._two_sides:
                 return await self.async_step_side_right()
 
-            return self.async_create_entry(
-                title=self._name,
-                data={
-                    CONF_NAME: self._name,
-                    CONF_SIDES: {SIDE_LEFT: self._left},
-                },
-            )
+            return await self.async_step_presets()
 
         return self.async_show_form(
             step_id="side_left",
@@ -125,20 +165,34 @@ class AdjustableBedEntityConfigFlow(
     async def async_step_side_right(self, user_input=None):
         """Configure the right bed side."""
         if user_input is not None:
-            return self.async_create_entry(
-                title=self._name,
-                data={
-                    CONF_NAME: self._name,
-                    CONF_SIDES: {
-                        SIDE_LEFT: self._left,
-                        SIDE_RIGHT: user_input,
-                    },
-                },
-            )
+            self._right = user_input
+            return await self.async_step_presets()
 
         return self.async_show_form(
             step_id="side_right",
             data_schema=side_schema(),
+        )
+
+    async def async_step_presets(self, user_input=None):
+        """Configure optional presets and memory positions."""
+        if user_input is not None:
+            sides = {SIDE_LEFT: self._left}
+
+            if self._two_sides:
+                sides[SIDE_RIGHT] = self._right
+
+            return self.async_create_entry(
+                title=self._name,
+                data={
+                    CONF_NAME: self._name,
+                    CONF_SIDES: sides,
+                    CONF_PRESETS: parse_presets(user_input),
+                },
+            )
+
+        return self.async_show_form(
+            step_id="presets",
+            data_schema=presets_schema(),
         )
 
     @staticmethod
@@ -154,5 +208,14 @@ class OptionsFlow(config_entries.OptionsFlow):
         self.entry = config_entry
 
     async def async_step_init(self, user_input=None):
-        """Show the options form."""
-        return self.async_show_form(step_id="init")
+        """Edit optional presets and memory positions."""
+        if user_input is not None:
+            return self.async_create_entry(
+                title="",
+                data={CONF_PRESETS: parse_presets(user_input)},
+            )
+
+        return self.async_show_form(
+            step_id="presets",
+            data_schema=presets_schema(self.entry.data.get(CONF_PRESETS, [])),
+        )
