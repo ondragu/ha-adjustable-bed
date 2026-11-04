@@ -12,6 +12,7 @@ from homeassistant.components.cover import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -35,6 +36,9 @@ from .const import (
 )
 
 LOGGER = logging.getLogger(__name__)
+
+MOVE_POLL_INTERVAL = 0.2
+POSITION_TOLERANCE = 1
 
 
 async def async_setup_entry(
@@ -129,6 +133,11 @@ class AdjustableBedCover(CoverEntity):
         await self.async_stop_cover()
 
     @property
+    def available(self) -> bool:
+        """Return whether the angle sensor is available."""
+        return self.angle is not None
+
+    @property
     def angle(self) -> float | None:
         """Return the current measured angle."""
         state = self.hass.states.get(self._sensor_entity)
@@ -218,9 +227,11 @@ class AdjustableBedCover(CoverEntity):
         """Stop both relays for this bed part."""
         if self._move_task and not self._move_task.done():
             self._move_task.cancel()
+            self._move_task = None
 
         await self._set_switch(self._up_switch, False)
         await self._set_switch(self._down_switch, False)
+        self.async_write_ha_state()
 
     async def async_set_cover_position(self, **kwargs) -> None:
         """Move to a target percentage using the angle sensor."""
@@ -229,6 +240,13 @@ class AdjustableBedCover(CoverEntity):
         if target is None:
             return
 
+        target = max(0, min(100, int(target)))
+
+        if self.angle is None:
+            raise HomeAssistantError(
+                "Der Winkelsensor ist nicht verfügbar; eine Zielposition kann nicht angefahren werden."
+            )
+
         await self._start_move(None, target)
 
     async def _start_move(
@@ -236,14 +254,16 @@ class AdjustableBedCover(CoverEntity):
         direction: str | None,
         target: int | None = None,
     ) -> None:
-        """Start a directional or target-position movement."""
+        """Start a directional or target-position movement safely."""
         await self.async_stop_cover()
 
         if direction == "up":
+            await self._set_switch(self._down_switch, False)
             await self._set_switch(self._up_switch, True)
             return
 
         if direction == "down":
+            await self._set_switch(self._up_switch, False)
             await self._set_switch(self._down_switch, True)
             return
 
@@ -261,28 +281,35 @@ class AdjustableBedCover(CoverEntity):
 
         if target > current:
             move_switch = self._up_switch
+            opposite_switch = self._down_switch
             increasing = True
         elif target < current:
             move_switch = self._down_switch
+            opposite_switch = self._up_switch
             increasing = False
         else:
             return
 
+        await self._set_switch(opposite_switch, False)
         await self._set_switch(move_switch, True)
 
         try:
             while True:
-                await asyncio.sleep(0.2)
+                await asyncio.sleep(MOVE_POLL_INTERVAL)
 
                 position = self.current_cover_position
 
                 if position is None:
+                    LOGGER.warning(
+                        "%s: Winkelsensor während der Bewegung nicht verfügbar; Motor wird gestoppt.",
+                        self._attr_name,
+                    )
                     break
 
-                if increasing and position >= target:
+                if increasing and position >= target - POSITION_TOLERANCE:
                     break
 
-                if not increasing and position <= target:
+                if not increasing and position <= target + POSITION_TOLERANCE:
                     break
         except asyncio.CancelledError:
             pass
