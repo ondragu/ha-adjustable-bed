@@ -1,0 +1,26 @@
+stop:
+  name: Stop
+  description: Stoppt alle Relais eines Kopf- oder Fußteils.
+  target:
+    entity:
+      integration: adjustable_bed_entity
+      domain: cover
+
+set_position:
+  name: Position setzen
+  description: Fährt ein Kopf- oder Fußteil sensorgestützt zu einer Zielposition.
+  target:
+    entity:
+      integration: adjustable_bed_entity
+      domain: cover
+  fields:
+    position:
+      name: Position
+      description: Zielposition in Prozent.
+      required: true
+      example: 40
+      selector:
+        number:
+          min: 0
+          max: 100
+          step: 1
